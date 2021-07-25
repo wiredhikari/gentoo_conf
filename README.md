@@ -1,1 +1,1 @@
-# awesomewm_gentoo
+# my gentoo configuration
