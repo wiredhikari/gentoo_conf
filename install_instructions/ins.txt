@@ -1,0 +1,106 @@
+gentoo install notes
+
+//mounting gentoo partition 
+mount /dev/nevme0n1p8 /mnt/gentoo
+
+//download tarball and unpack
+wget https://bouncer.gentoo.org/fetch/root/all/releases/amd64/autobuilds/20211101T222649Z/stage3-amd64-openrc-20211101T222649Z.tar.xz
+tar xpvf filename --xattrs-include='*.*'
+
+//modify make.conf
+copy make.conf to /etc/portage/make.conf
+
+
+mkdir --parents /etc/portage/repos.conf
+cp /use/share/portage/config/repos.conf /etc/portage/repos.conf/gentoo.conf
+cp --dereferences /etc/resolv.conf /etc/
+
+
+
+//chroot using those 6 commands
+source /etc/profile
+mount /dev/nvme0n1p9 /boot
+emerge-webrsync
+
+eselect profile list
+eselect profile set _
+
+
+emerge --verbose --update --deep --newuse @world
+//emege your required apps
+emerge -q vim neovim 
+
+//update timezone
+echo "India/Kolkata" > /etc/timezone
+emerge --config sys-libs/timezone-data
+eselect locale list
+vim /etc/locale.gen 
+{// see in your old system 
+C.UTF8 UTF-8
+en_US.UTF-8 UTF-8 
+}
+
+eselect locale set _
+
+env-update && source /etc/profile
+
+emerge -q --autounmask-write sys-kernel/gentoo-sources genkernel
+emerge -q sys-app/pciutils app-arch/lzop app-arch/lz4 
+
+//kernel config
+cd usr/src/linux 
+make menuconfig
+make && make_modules && make_install
+
+//create initramfs
+genkernel --install --kernel-config=/usr/src/linux/.config initramfs
+
+
+//check if initramfs file exists in /boot/
+//hostname
+vim /etc/conf.d/hostname
+
+
+//internet config
+emerge --noreplace --quiet net-misc/netifrc
+emerge dhcpcd
+
+vim /etc/conf.d/net
+config_enp0s20f0u1 
+
+cd /etc/init.d 
+ln -s net.lo net.enp0s20f0u1 
+rc-update add net.enp0s20f0u1 default
+
+
+//get uuids
+blkid
+//grub
+emerge --verbose sys-boot/grub:2
+
+grub--install --target=x86_64 --efi-directory=/boot
+grub-mkconfig -o /boot/grub/grub.cfg
+
+//set fstab
+vim /etc/fstab
+emerge -q sys-admin/sudo
+
+//run deps.txt
+
+
+useradd -m -G users,wheelmaudio -s /bin/bash hixari
+passwd
+passwd hixari
+
+
+rc-update add dbus default
+rc-update add display-manager default
+
+To start LightDM now:
+rc-service dbus start
+rc-service display-manager start
+
+
+
+
+Use make.conf example
