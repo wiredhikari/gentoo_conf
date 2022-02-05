@@ -17,7 +17,7 @@ x11-misc/unclutter
 x11-misc/xclip
 x11-misc/pcmanfm
 x11-apps/xbacklight
-x11-terms/alavritty
+x11-terms/alacritty
 
 
 #fonts
