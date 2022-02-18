@@ -28,4 +28,4 @@ media-sound/alsa-utils \
 
 #misc
 www-client/firefox-bin \
-dev-vcs/git \
+dev-vcs/git
